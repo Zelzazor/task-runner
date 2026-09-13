@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import { registerCommands } from './commands';
+import { TaskExecutionTracker } from './tasks/taskExecutionTracker';
 import { TaskSource } from './tasks/taskSource';
 import { TaskTreeDataProvider } from './tree/taskTreeDataProvider';
 
 export function activate(context: vscode.ExtensionContext) {
 	const taskSource = new TaskSource();
-	const treeDataProvider = new TaskTreeDataProvider(taskSource);
+	const executionTracker = new TaskExecutionTracker();
+	const treeDataProvider = new TaskTreeDataProvider(taskSource, executionTracker);
 	const treeView = vscode.window.createTreeView('taskRunner.tasksView', { treeDataProvider });
 
 	const updateHasTasksContext = async () => {
@@ -15,9 +17,9 @@ export function activate(context: vscode.ExtensionContext) {
 	taskSource.onDidChangeTasks(updateHasTasksContext);
 	void updateHasTasksContext();
 
-	registerCommands(context, { taskSource, treeDataProvider });
+	registerCommands(context, { taskSource, treeDataProvider, executionTracker });
 
-	context.subscriptions.push(taskSource, treeView);
+	context.subscriptions.push(taskSource, executionTracker, treeView);
 }
 
 export function deactivate() {}

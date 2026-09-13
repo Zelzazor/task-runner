@@ -1,19 +1,22 @@
 import * as vscode from 'vscode';
+import { TaskExecutionTracker } from '../tasks/taskExecutionTracker';
+import { taskKey, TaskKey } from '../tasks/taskKey';
 import { TaskSource } from '../tasks/taskSource';
-import { buildTaskTree, FolderNode, GroupNode, groupLabel, TaskGroupKind, TaskNode, TreeNode } from './treeNodes';
-
-const GROUP_ICON_IDS: Record<TaskGroupKind, string> = {
-	build: 'tools',
-	test: 'beaker',
-	other: 'play-circle',
-};
+import { groupIcon, taskIcon } from './icons';
+import { buildTaskTree, FolderNode, GroupNode, groupLabel, TaskNode, TreeNode } from './treeNodes';
 
 export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeNode | undefined>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-	constructor(private readonly taskSource: TaskSource) {
+	private readonly taskNodesByKey = new Map<TaskKey, TaskNode>();
+
+	constructor(
+		private readonly taskSource: TaskSource,
+		private readonly executionTracker: TaskExecutionTracker,
+	) {
 		taskSource.onDidChangeTasks(() => this.refresh());
+		executionTracker.onDidChangeState(key => this.refresh(this.taskNodesByKey.get(key)));
 	}
 
 	refresh(node?: TreeNode): void {
@@ -34,7 +37,9 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 	async getChildren(element?: TreeNode): Promise<TreeNode[]> {
 		if (!element) {
 			const tasks = await this.taskSource.getTasks();
-			return buildTaskTree(tasks, vscode.workspace.workspaceFolders ?? []);
+			const tree = buildTaskTree(tasks, vscode.workspace.workspaceFolders ?? []);
+			this.indexTaskNodes(tree);
+			return tree;
 		}
 		if (element.kind === 'folder') {
 			return element.groups;
@@ -43,6 +48,20 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 			return element.tasks;
 		}
 		return [];
+	}
+
+	private indexTaskNodes(nodes: TreeNode[]): void {
+		this.taskNodesByKey.clear();
+		const visit = (node: TreeNode): void => {
+			if (node.kind === 'task') {
+				this.taskNodesByKey.set(taskKey(node.task), node);
+			} else if (node.kind === 'group') {
+				node.tasks.forEach(visit);
+			} else {
+				node.groups.forEach(visit);
+			}
+		};
+		nodes.forEach(visit);
 	}
 
 	private folderTreeItem(node: FolderNode): vscode.TreeItem {
@@ -54,16 +73,18 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 
 	private groupTreeItem(node: GroupNode): vscode.TreeItem {
 		const item = new vscode.TreeItem(groupLabel(node.group), vscode.TreeItemCollapsibleState.Expanded);
-		item.iconPath = new vscode.ThemeIcon(GROUP_ICON_IDS[node.group]);
+		item.iconPath = groupIcon(node.group);
 		item.contextValue = 'group';
 		return item;
 	}
 
 	private taskTreeItem(node: TaskNode): vscode.TreeItem {
 		const { task } = node;
+		const state = this.executionTracker.getState(task);
 		const item = new vscode.TreeItem(task.name, vscode.TreeItemCollapsibleState.None);
-		item.iconPath = new vscode.ThemeIcon('circle-outline');
-		item.contextValue = 'task-idle';
+		item.id = taskKey(task);
+		item.iconPath = taskIcon(state);
+		item.contextValue = state === 'running' ? 'task-running' : 'task-idle';
 		item.command = { command: 'task-runner.runTask', title: 'Run Task', arguments: [node] };
 		if (task.group?.isDefault) {
 			item.description = 'default';

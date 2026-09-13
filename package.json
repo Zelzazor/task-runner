@@ -34,6 +34,12 @@
         "command": "task-runner.revealTaskInJson",
         "title": "Reveal in tasks.json",
         "category": "Task Runner"
+      },
+      {
+        "command": "task-runner.terminateTask",
+        "title": "Stop Task",
+        "icon": "$(debug-stop)",
+        "category": "Task Runner"
       }
     ],
     "menus": {
@@ -52,7 +58,12 @@
       "view/item/context": [
         {
           "command": "task-runner.runTask",
-          "when": "view == taskRunner.tasksView && viewItem =~ /^task-/",
+          "when": "view == taskRunner.tasksView && viewItem == 'task-idle'",
+          "group": "inline"
+        },
+        {
+          "command": "task-runner.terminateTask",
+          "when": "view == taskRunner.tasksView && viewItem == 'task-running'",
           "group": "inline"
         },
         {
