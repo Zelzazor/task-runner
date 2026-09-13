@@ -18,6 +18,22 @@
         "title": "Refresh Tasks",
         "icon": "$(refresh)",
         "category": "Task Runner"
+      },
+      {
+        "command": "task-runner.runTask",
+        "title": "Run Task",
+        "category": "Task Runner"
+      },
+      {
+        "command": "task-runner.openTasksJson",
+        "title": "Open tasks.json",
+        "icon": "$(go-to-file)",
+        "category": "Task Runner"
+      },
+      {
+        "command": "task-runner.revealTaskInJson",
+        "title": "Reveal in tasks.json",
+        "category": "Task Runner"
       }
     ],
     "menus": {
@@ -26,6 +42,26 @@
           "command": "task-runner.refresh",
           "when": "view == taskRunner.tasksView",
           "group": "navigation"
+        },
+        {
+          "command": "task-runner.openTasksJson",
+          "when": "view == taskRunner.tasksView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "task-runner.runTask",
+          "when": "view == taskRunner.tasksView && viewItem =~ /^task-/",
+          "group": "inline"
+        },
+        {
+          "command": "task-runner.revealTaskInJson",
+          "when": "view == taskRunner.tasksView && viewItem =~ /^task-/"
+        },
+        {
+          "command": "task-runner.openTasksJson",
+          "when": "view == taskRunner.tasksView && viewItem == 'folder'"
         }
       ]
     },

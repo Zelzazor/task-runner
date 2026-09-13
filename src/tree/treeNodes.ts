@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isWorkspaceFolder } from '../tasks/taskScope';
 
 export type TaskGroupKind = 'build' | 'test' | 'other';
 
@@ -52,10 +53,6 @@ function groupTasks(tasks: vscode.Task[]): GroupNode[] {
 	return GROUP_ORDER
 		.map((group): GroupNode => ({ kind: 'group', group, tasks: byGroup.get(group)! }))
 		.filter(node => node.tasks.length > 0);
-}
-
-function isWorkspaceFolder(scope: vscode.Task['scope']): scope is vscode.WorkspaceFolder {
-	return typeof scope === 'object' && scope !== null && 'uri' in scope;
 }
 
 function folderKey(folder: vscode.WorkspaceFolder): string {

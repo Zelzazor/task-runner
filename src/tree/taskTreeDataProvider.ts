@@ -64,6 +64,7 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 		const item = new vscode.TreeItem(task.name, vscode.TreeItemCollapsibleState.None);
 		item.iconPath = new vscode.ThemeIcon('circle-outline');
 		item.contextValue = 'task-idle';
+		item.command = { command: 'task-runner.runTask', title: 'Run Task', arguments: [node] };
 		if (task.group?.isDefault) {
 			item.description = 'default';
 		}
