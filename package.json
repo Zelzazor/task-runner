@@ -12,6 +12,23 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "task-runner.refresh",
+        "title": "Refresh Tasks",
+        "icon": "$(refresh)",
+        "category": "Task Runner"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "task-runner.refresh",
+          "when": "view == taskRunner.tasksView",
+          "group": "navigation"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {

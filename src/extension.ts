@@ -1,21 +1,23 @@
 import * as vscode from 'vscode';
-
-class EmptyTaskTreeDataProvider implements vscode.TreeDataProvider<never> {
-	getTreeItem(element: never): vscode.TreeItem {
-		return element;
-	}
-
-	getChildren(): never[] {
-		return [];
-	}
-}
+import { registerCommands } from './commands';
+import { TaskSource } from './tasks/taskSource';
+import { TaskTreeDataProvider } from './tree/taskTreeDataProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-	const treeView = vscode.window.createTreeView('taskRunner.tasksView', {
-		treeDataProvider: new EmptyTaskTreeDataProvider(),
-	});
+	const taskSource = new TaskSource();
+	const treeDataProvider = new TaskTreeDataProvider(taskSource);
+	const treeView = vscode.window.createTreeView('taskRunner.tasksView', { treeDataProvider });
 
-	context.subscriptions.push(treeView);
+	const updateHasTasksContext = async () => {
+		const tasks = await taskSource.getTasks();
+		await vscode.commands.executeCommand('setContext', 'taskRunner.hasTasks', tasks.length > 0);
+	};
+	taskSource.onDidChangeTasks(updateHasTasksContext);
+	void updateHasTasksContext();
+
+	registerCommands(context, { taskSource, treeDataProvider });
+
+	context.subscriptions.push(taskSource, treeView);
 }
 
 export function deactivate() {}
