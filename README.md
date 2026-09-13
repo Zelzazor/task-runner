@@ -1,71 +1,35 @@
-# task-runner README
+# task-runner
 
-This is the README for your extension "task-runner". After writing up a brief description, we recommend including the following sections.
+A tab in VS Code's Activity Bar that lists the tasks defined in your workspace's `.vscode/tasks.json` and lets you run them with one click — no Command Palette required. Aimed at developers used to IDE build/run buttons (Xcode, Android Studio) who want the same one-click workflow in VS Code.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- A dedicated Activity Bar view listing tasks explicitly defined in `tasks.json`, grouped into Build / Test / Other buckets.
+- Click a task to run it immediately.
+- Live status icons: spinner while running, checkmark on success, error icon on failure.
+- An inline stop button to terminate a running task (e.g. a background/watch task).
+- Right-click a task to reveal its entry in `tasks.json`, or use the toolbar button to open the file directly.
+- Multi-root workspace support: tasks are grouped by folder when more than one root is open.
+- An empty-state prompt to configure a task when the workspace doesn't have any yet.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+No external dependencies or setup. The view works with any workspace that has a `.vscode/tasks.json`; if one doesn't exist yet, use the button shown in the empty state (or VS Code's own "Tasks: Configure Task" command) to create it.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+* `task-runner.includeAutoDetected`: Also show tasks auto-detected by other providers (npm, gulp, etc.), not just tasks explicitly defined in `tasks.json`. Default: `false`.
+* `task-runner.groupBy`: How tasks are grouped in the view — `"group"` (Build/Test/Other buckets) or `"none"` (flat alphabetical list). Default: `"group"`.
+* `task-runner.showTaskType`: Show each task's type (e.g. `shell`, `npm`) next to its name. Default: `true`.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+None currently tracked.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release: Activity Bar view of `tasks.json` tasks, click-to-run, live run-state icons, a stop action, `tasks.json` navigation commands, and configurable grouping/filtering settings.
