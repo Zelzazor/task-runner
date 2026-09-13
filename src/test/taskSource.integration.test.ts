@@ -7,7 +7,7 @@ suite('TaskSource integration', () => {
 		try {
 			const tasks = await taskSource.getTasks();
 			const names = tasks.map(task => task.name).sort();
-			assert.deepStrictEqual(names, ['Build App', 'Run Tests']);
+			assert.deepStrictEqual(names, ['Build App', 'Deploy', 'Run Tests']);
 			assert.ok(tasks.every(task => task.source === 'Workspace'));
 		} finally {
 			taskSource.dispose();

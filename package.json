@@ -3,7 +3,7 @@
   "name": "easy-task-runner",
   "displayName": "Easy Task Runner",
   "description": "A tab added to VSCode that allows you to easily run tasks from your tasks.json without having to use the command palette.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "MIT",
   "repository": {
     "type": "git",

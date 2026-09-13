@@ -69,4 +69,27 @@ suite('treeNodes', () => {
 		const tree = buildTaskTree(tasks, [folderA, folderB]);
 		assert.strictEqual(tree.length, 1);
 	});
+
+	test('classifyTask prefers a custom group over the built-in build/test/other bucket', () => {
+		const customGroups = new Map([['deploy-app', 'Deploy']]);
+		assert.strictEqual(classifyTask(makeTask('deploy-app', { group: vscode.TaskGroup.Build }), customGroups), 'Deploy');
+		assert.strictEqual(classifyTask(makeTask('lint'), customGroups), 'other');
+	});
+
+	test('buildTaskTree places custom groups after build/test/other, alphabetically', () => {
+		const customGroups = new Map([
+			['deploy-app', 'Deploy'],
+			['check-format', 'Lint'],
+		]);
+		const tasks = [
+			makeTask('build-app', { group: vscode.TaskGroup.Build }),
+			makeTask('deploy-app'),
+			makeTask('check-format'),
+		];
+		const tree = buildTaskTree(tasks, [], 'group', customGroups);
+		assert.deepStrictEqual(
+			tree.map(node => (node.kind === 'group' ? node.group : undefined)),
+			['build', 'Deploy', 'Lint'],
+		);
+	});
 });

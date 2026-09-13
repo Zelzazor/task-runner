@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { readSettings } from '../settings';
+import { readCustomGroups } from '../tasks/customGroups';
 import { TaskExecutionTracker } from '../tasks/taskExecutionTracker';
 import { taskKey, TaskKey } from '../tasks/taskKey';
 import { TaskSource } from '../tasks/taskSource';
@@ -39,7 +40,9 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 		if (!element) {
 			const tasks = await this.taskSource.getTasks();
 			const { groupBy } = readSettings();
-			const tree = buildTaskTree(tasks, vscode.workspace.workspaceFolders ?? [], groupBy);
+			const folders = vscode.workspace.workspaceFolders ?? [];
+			const customGroups = readCustomGroups(folders);
+			const tree = buildTaskTree(tasks, folders, groupBy, customGroups);
 			this.indexTaskNodes(tree);
 			return tree;
 		}

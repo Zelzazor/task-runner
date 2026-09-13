@@ -1,15 +1,17 @@
 import * as vscode from 'vscode';
 import { TaskRunState } from '../tasks/taskExecutionTracker';
-import { TaskGroupKind } from './treeNodes';
+import { BuiltinGroupKind, TaskGroupKind } from './treeNodes';
 
-const GROUP_ICON_IDS: Record<TaskGroupKind, string> = {
+const GROUP_ICON_IDS: Record<BuiltinGroupKind, string> = {
 	build: 'tools',
 	test: 'beaker',
 	other: 'play-circle',
 };
 
+const CUSTOM_GROUP_ICON_ID = 'tag';
+
 export function groupIcon(group: TaskGroupKind): vscode.ThemeIcon {
-	return new vscode.ThemeIcon(GROUP_ICON_IDS[group]);
+	return new vscode.ThemeIcon(GROUP_ICON_IDS[group as BuiltinGroupKind] ?? CUSTOM_GROUP_ICON_ID);
 }
 
 export function taskIcon(state: TaskRunState | undefined): vscode.ThemeIcon {

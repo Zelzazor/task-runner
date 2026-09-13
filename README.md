@@ -4,7 +4,7 @@ A tab in VS Code's Activity Bar that lists the tasks defined in your workspace's
 
 ## Features
 
-- A dedicated Activity Bar view listing tasks explicitly defined in `tasks.json`, grouped into Build / Test / Other buckets.
+- A dedicated Activity Bar view listing tasks explicitly defined in `tasks.json`, grouped into Build / Test / Other buckets (plus any custom groups you define).
 - Click a task to run it immediately.
 - Live status icons: spinner while running, checkmark on success, error icon on failure.
 - An inline stop button to terminate a running task (e.g. a background/watch task).
@@ -21,8 +21,25 @@ No external dependencies or setup. The view works with any workspace that has a 
 This extension contributes the following settings:
 
 * `task-runner.includeAutoDetected`: Also show tasks auto-detected by other providers (npm, gulp, etc.), not just tasks explicitly defined in `tasks.json`. Default: `false`.
-* `task-runner.groupBy`: How tasks are grouped in the view — `"group"` (Build/Test/Other buckets) or `"none"` (flat alphabetical list). Default: `"group"`.
+* `task-runner.groupBy`: How tasks are grouped in the view — `"group"` (Build/Test/Other buckets, plus any custom groups) or `"none"` (flat alphabetical list). Default: `"group"`.
 * `task-runner.showTaskType`: Show each task's type (e.g. `shell`, `npm`) next to its name. Default: `true`.
+
+### Custom groups
+
+Add a `"task-runner.group"` property under a task's `options` in `tasks.json` to put it in its own bucket instead of Build/Test/Other:
+
+```jsonc
+{
+  "label": "Deploy",
+  "type": "shell",
+  "command": "./deploy.sh",
+  "options": {
+    "task-runner.group": "Deploy"
+  }
+}
+```
+
+It goes under `options` rather than at the top level because VS Code's tasks.json schema rejects unrecognized top-level properties (you'd get a red squiggly) but explicitly allows arbitrary ones under `options`. Custom buckets are sorted alphabetically after Build/Test/Other. This is a `task-runner`-specific property (VS Code itself ignores it, and it isn't passed to the task's environment) — it takes priority over the task's own `"group"` field for classification purposes, but doesn't affect VS Code's own build/test task handling (e.g. `Ctrl+Shift+B`).
 
 ## Known Issues
 

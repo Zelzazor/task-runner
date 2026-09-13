@@ -15,6 +15,14 @@
 			"type": "shell",
 			"command": "echo test",
 			"group": "test"
+		},
+		{
+			"label": "Deploy",
+			"type": "shell",
+			"command": "echo deploy",
+			"options": {
+				"task-runner.group": "Deploy"
+			}
 		}
 	]
 }
