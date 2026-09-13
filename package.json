@@ -3,6 +3,7 @@
   "displayName": "task-runner",
   "description": "A tab added to VSCode that allows you to easily run tasks from your tasks.json without having to use the command palette.",
   "version": "0.0.1",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Zelzazor/task-runner.git"
