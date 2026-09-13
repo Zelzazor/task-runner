@@ -1,7 +1,7 @@
 {
   "name": "task-runner",
   "displayName": "task-runner",
-  "description": "A tab added to VSCode that allows you to easily run tasks from your tasks.json without having to use the command palette. ",
+  "description": "A tab added to VSCode that allows you to easily run tasks from your tasks.json without having to use the command palette.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.137.0"
@@ -22,6 +22,7 @@
       {
         "command": "task-runner.runTask",
         "title": "Run Task",
+        "icon": "$(play)",
         "category": "Task Runner"
       },
       {
@@ -53,6 +54,20 @@
           "command": "task-runner.openTasksJson",
           "when": "view == taskRunner.tasksView",
           "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "task-runner.runTask",
+          "when": "false"
+        },
+        {
+          "command": "task-runner.terminateTask",
+          "when": "false"
+        },
+        {
+          "command": "task-runner.revealTaskInJson",
+          "when": "false"
         }
       ],
       "view/item/context": [
@@ -89,15 +104,22 @@
       "taskRunner": [
         {
           "id": "taskRunner.tasksView",
-          "name": "Tasks"
+          "name": "Tasks",
+          "icon": "resources/activity-bar-icon.svg",
+          "contextualTitle": "Task Runner"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "taskRunner.tasksView",
+        "contents": "Loading tasks…",
+        "when": "taskRunner.tasksLoading"
+      },
+      {
+        "view": "taskRunner.tasksView",
         "contents": "No tasks found in tasks.json.\n[Configure a Task](command:workbench.action.tasks.configureTaskRunner)",
-        "when": "!taskRunner.hasTasks"
+        "when": "!taskRunner.hasTasks && !taskRunner.tasksLoading"
       }
     ],
     "configuration": {

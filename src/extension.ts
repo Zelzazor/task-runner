@@ -10,9 +10,14 @@ export function activate(context: vscode.ExtensionContext) {
 	const treeDataProvider = new TaskTreeDataProvider(taskSource, executionTracker);
 	const treeView = vscode.window.createTreeView('taskRunner.tasksView', { treeDataProvider });
 
+	const setLoading = (loading: boolean) =>
+		vscode.commands.executeCommand('setContext', 'taskRunner.tasksLoading', loading);
+
 	const updateHasTasksContext = async () => {
+		await setLoading(true);
 		const tasks = await taskSource.getTasks();
 		await vscode.commands.executeCommand('setContext', 'taskRunner.hasTasks', tasks.length > 0);
+		await setLoading(false);
 	};
 	taskSource.onDidChangeTasks(updateHasTasksContext);
 	void updateHasTasksContext();
