@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { GroupByMode } from '../settings';
 import { isWorkspaceFolder } from '../tasks/taskScope';
 
 export type TaskGroupKind = 'build' | 'test' | 'other';
@@ -17,7 +18,7 @@ export interface GroupNode {
 export interface FolderNode {
 	readonly kind: 'folder';
 	readonly folder: vscode.WorkspaceFolder;
-	readonly groups: GroupNode[];
+	readonly children: TreeNode[];
 }
 
 export type TreeNode = FolderNode | GroupNode | TaskNode;
@@ -55,6 +56,16 @@ function groupTasks(tasks: vscode.Task[]): GroupNode[] {
 		.filter(node => node.tasks.length > 0);
 }
 
+function flattenTasks(tasks: vscode.Task[]): TaskNode[] {
+	return [...tasks]
+		.sort((a, b) => a.name.localeCompare(b.name))
+		.map((task): TaskNode => ({ kind: 'task', task }));
+}
+
+function buildChildren(tasks: vscode.Task[], groupBy: GroupByMode): TreeNode[] {
+	return groupBy === 'none' ? flattenTasks(tasks) : groupTasks(tasks);
+}
+
 function folderKey(folder: vscode.WorkspaceFolder): string {
 	return folder.uri.toString();
 }
@@ -62,11 +73,11 @@ function folderKey(folder: vscode.WorkspaceFolder): string {
 /**
  * Builds the tree shown in the view: a folder layer only appears when the
  * workspace has more than one root, otherwise tasks go straight into their
- * Build/Test/Other group buckets.
+ * children (Build/Test/Other buckets, or a flat list per task-runner.groupBy).
  */
-export function buildTaskTree(tasks: vscode.Task[], folders: readonly vscode.WorkspaceFolder[]): TreeNode[] {
+export function buildTaskTree(tasks: vscode.Task[], folders: readonly vscode.WorkspaceFolder[], groupBy: GroupByMode = 'group'): TreeNode[] {
 	if (folders.length <= 1) {
-		return groupTasks(tasks);
+		return buildChildren(tasks, groupBy);
 	}
 
 	const byFolder = new Map<string, vscode.Task[]>(folders.map(folder => [folderKey(folder), []]));
@@ -80,7 +91,7 @@ export function buildTaskTree(tasks: vscode.Task[], folders: readonly vscode.Wor
 		.map((folder): FolderNode => ({
 			kind: 'folder',
 			folder,
-			groups: groupTasks(byFolder.get(folderKey(folder)) ?? []),
+			children: buildChildren(byFolder.get(folderKey(folder)) ?? [], groupBy),
 		}))
-		.filter(node => node.groups.length > 0);
+		.filter(node => node.children.length > 0);
 }

@@ -1,21 +1,27 @@
 import * as vscode from 'vscode';
+import { onDidChangeSettings, readSettings } from '../settings';
 
 /**
- * Resolves the tasks explicitly defined in workspace tasks.json files,
- * excluding tasks auto-detected by other providers (npm, gulp, etc.).
+ * Resolves the tasks explicitly defined in workspace tasks.json files
+ * (plus auto-detected provider tasks, if task-runner.includeAutoDetected
+ * is enabled).
  */
 export class TaskSource implements vscode.Disposable {
 	private readonly _onDidChangeTasks = new vscode.EventEmitter<void>();
 	readonly onDidChangeTasks = this._onDidChangeTasks.event;
 
-	private readonly watcher: vscode.FileSystemWatcher;
+	private readonly subscriptions: vscode.Disposable[];
 	private cached: Promise<vscode.Task[]> | undefined;
 
 	constructor() {
-		this.watcher = vscode.workspace.createFileSystemWatcher('**/.vscode/tasks.json');
-		this.watcher.onDidCreate(() => this.refresh());
-		this.watcher.onDidChange(() => this.refresh());
-		this.watcher.onDidDelete(() => this.refresh());
+		const watcher = vscode.workspace.createFileSystemWatcher('**/.vscode/tasks.json');
+		this.subscriptions = [
+			watcher,
+			watcher.onDidCreate(() => this.refresh()),
+			watcher.onDidChange(() => this.refresh()),
+			watcher.onDidDelete(() => this.refresh()),
+			onDidChangeSettings(() => this.refresh()),
+		];
 	}
 
 	getTasks(): Promise<vscode.Task[]> {
@@ -31,12 +37,13 @@ export class TaskSource implements vscode.Disposable {
 	}
 
 	private async fetchWorkspaceTasks(): Promise<vscode.Task[]> {
+		const { includeAutoDetected } = readSettings();
 		const tasks = await vscode.tasks.fetchTasks();
-		return tasks.filter(task => task.source === 'Workspace');
+		return tasks.filter(task => includeAutoDetected || task.source === 'Workspace');
 	}
 
 	dispose(): void {
-		this.watcher.dispose();
+		this.subscriptions.forEach(subscription => subscription.dispose());
 		this._onDidChangeTasks.dispose();
 	}
 }

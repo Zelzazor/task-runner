@@ -99,7 +99,35 @@
         "contents": "No tasks found in tasks.json.\n[Configure a Task](command:workbench.action.tasks.configureTaskRunner)",
         "when": "!taskRunner.hasTasks"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Task Runner",
+      "properties": {
+        "task-runner.includeAutoDetected": {
+          "type": "boolean",
+          "default": false,
+          "description": "Also show tasks auto-detected by other providers (npm, gulp, etc.), not just tasks explicitly defined in tasks.json."
+        },
+        "task-runner.groupBy": {
+          "type": "string",
+          "enum": [
+            "group",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Group tasks into Build/Test/Other buckets",
+            "Show a flat, alphabetical list of tasks"
+          ],
+          "default": "group",
+          "description": "How tasks are grouped in the Task Runner view."
+        },
+        "task-runner.showTaskType": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show each task's type (e.g. shell, npm) next to its name."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

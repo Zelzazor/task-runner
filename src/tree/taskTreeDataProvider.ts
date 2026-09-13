@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { readSettings } from '../settings';
 import { TaskExecutionTracker } from '../tasks/taskExecutionTracker';
 import { taskKey, TaskKey } from '../tasks/taskKey';
 import { TaskSource } from '../tasks/taskSource';
@@ -37,12 +38,13 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 	async getChildren(element?: TreeNode): Promise<TreeNode[]> {
 		if (!element) {
 			const tasks = await this.taskSource.getTasks();
-			const tree = buildTaskTree(tasks, vscode.workspace.workspaceFolders ?? []);
+			const { groupBy } = readSettings();
+			const tree = buildTaskTree(tasks, vscode.workspace.workspaceFolders ?? [], groupBy);
 			this.indexTaskNodes(tree);
 			return tree;
 		}
 		if (element.kind === 'folder') {
-			return element.groups;
+			return element.children;
 		}
 		if (element.kind === 'group') {
 			return element.tasks;
@@ -58,7 +60,7 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 			} else if (node.kind === 'group') {
 				node.tasks.forEach(visit);
 			} else {
-				node.groups.forEach(visit);
+				node.children.forEach(visit);
 			}
 		};
 		nodes.forEach(visit);
@@ -86,8 +88,17 @@ export class TaskTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 		item.iconPath = taskIcon(state);
 		item.contextValue = state === 'running' ? 'task-running' : 'task-idle';
 		item.command = { command: 'task-runner.runTask', title: 'Run Task', arguments: [node] };
+
+		const { showTaskType } = readSettings();
+		const descriptionParts: string[] = [];
+		if (showTaskType) {
+			descriptionParts.push(task.definition.type);
+		}
 		if (task.group?.isDefault) {
-			item.description = 'default';
+			descriptionParts.push('default');
+		}
+		if (descriptionParts.length > 0) {
+			item.description = descriptionParts.join(' · ');
 		}
 		return item;
 	}
