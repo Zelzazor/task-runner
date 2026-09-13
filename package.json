@@ -12,10 +12,28 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "taskRunner",
+          "title": "Task Runner",
+          "icon": "resources/activity-bar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "taskRunner": [
+        {
+          "id": "taskRunner.tasksView",
+          "name": "Tasks"
+        }
+      ]
+    },
+    "viewsWelcome": [
       {
-        "command": "task-runner.helloWorld",
-        "title": "Hello World"
+        "view": "taskRunner.tasksView",
+        "contents": "No tasks found in tasks.json.\n[Configure a Task](command:workbench.action.tasks.configureTaskRunner)",
+        "when": "!taskRunner.hasTasks"
       }
     ]
   },
